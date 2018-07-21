@@ -14,7 +14,10 @@ Module.register('MMM-ping', {
         display: 'both',
         hosts: [],
         updateInterval: 5,
-        font: 'medium'
+        font: 'medium',
+        showShortNames: false,
+        shortNames: [],
+        header: ''
     },
 
     start() {
@@ -31,10 +34,19 @@ Module.register('MMM-ping', {
     },
 
     getDom() {
+        const hosts = Object.keys(this.status);
         const wrapper = document.createElement('div');
         wrapper.classList.add(this.config.font);
         wrapper.style.textAlign = 'left';
-        const hosts = Object.keys(this.status);
+
+        if (this.config.header !== '') {
+            const header = document.createElement('header');
+            header.classList.add(this.config.font);
+            header.style.textAlign = 'left';
+            header.innerHTML = this.config.header;           
+            wrapper.appendChild(header);
+        }
+
         if (hosts.length > 0) {
             for (let i = 0; i < hosts.length; i += 1) {
                 const isOnline = this.status[hosts[i]];
@@ -42,12 +54,17 @@ Module.register('MMM-ping', {
                     (!isOnline && (this.config.display === 'both' || this.config.display === 'offline'))) {
                     const div = document.createElement('div');
                     const span = document.createElement('span');
-                    span.innerHTML = isOnline ? '&#9899;' : '&#9898;';
+                    span.innerHTML = isOnline ? '&#128581;' : '&#x1F64B;'; // Emoji's
+                    span.style.paddingRight = '10px'
                     if (this.config.colored) {
                         span.style.color = isOnline ? 'green' : 'red';
                     }
                     const host = document.createElement('span');
-                    host.innerHTML = hosts[i];
+                    if (this.config.showShortNames) { 
+                        host.innerHTML = this.config.shortNames[i];
+                    } else {
+                        host.innerHTML = hosts[i];    
+                    }
                     div.appendChild(span);
                     div.appendChild(host);
                     wrapper.appendChild(div);
